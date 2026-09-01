@@ -29,6 +29,24 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 
+
+def _load_dotenv(path: str) -> None:
+    """Minimal .env loader for local runs; real env vars always win."""
+    if not os.path.exists(path):
+        return
+    with open(path, encoding="utf-8") as fh:
+        for line in fh:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, v = line.split("=", 1)
+            k, v = k.strip(), v.strip().strip("'\"")
+            if k and v and not os.environ.get(k):
+                os.environ[k] = v
+
+
+_load_dotenv(os.path.join(BASE_DIR, ".env"))
+
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "").strip()
 GROQ_BASE = "https://api.groq.com/openai/v1"
 STT_MODEL = os.environ.get("STT_MODEL", "whisper-large-v3")
