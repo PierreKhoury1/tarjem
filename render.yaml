@@ -1,0 +1,35 @@
+# Render blueprint - deploys Tarjem as a free web service.
+# Everything heavy (speech recognition, translation, TTS) is a remote API call,
+# so the free instance only relays audio and serves static files.
+services:
+  - type: web
+    name: tarjem
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -w 1 --threads 16 --timeout 120 -b 0.0.0.0:$PORT server:app
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      # Free key from https://console.groq.com/keys - used for Whisper STT and translation.
+      - key: GROQ_API_KEY
+        sync: false
+      # Anyone with the URL can spend your Groq quota without this.
+      - key: ACCESS_CODE
+        sync: false
+      - key: STT_MODEL
+        value: whisper-large-v3
+      - key: STT_INTERIM_MODEL
+        value: whisper-large-v3-turbo
+      - key: TRANSLATE_MODELS
+        value: moonshotai/kimi-k2-instruct-0905,openai/gpt-oss-120b,llama-3.3-70b-versatile
+      # Optional: set TRANSLATE_PROVIDER=gemini + GEMINI_API_KEY (free at aistudio.google.com)
+      - key: TRANSLATE_PROVIDER
+        value: groq
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: TTS_VOICE_EN
+        value: en-US-JennyNeural
+      - key: TTS_VOICE_AR
+        value: ar-SA-ZariyahNeural
