@@ -31,7 +31,9 @@ STATIC_DIR = os.path.join(BASE_DIR, "static")
 
 
 def _load_dotenv(path: str) -> None:
-    """Minimal .env loader for local runs; real env vars always win."""
+    """Minimal .env loader for local runs. Values in .env override the inherited
+    environment on purpose: a stale GROQ_API_KEY left in the Windows user
+    environment must not shadow the key the user just saved here."""
     if not os.path.exists(path):
         return
     with open(path, encoding="utf-8") as fh:
@@ -41,7 +43,7 @@ def _load_dotenv(path: str) -> None:
                 continue
             k, v = line.split("=", 1)
             k, v = k.strip(), v.strip().strip("'\"")
-            if k and v and not os.environ.get(k):
+            if k and v:
                 os.environ[k] = v
 
 
