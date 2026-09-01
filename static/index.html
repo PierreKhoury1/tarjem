@@ -11,28 +11,47 @@
     --bg:#0b0f14; --panel:#121820; --panel2:#182130; --line:#233042;
     --text:#e8eef6; --muted:#8b98ab; --accent:#3ddc97; --accent2:#4da3ff;
     --danger:#ff5c7a; --warn:#ffb648; --ar:#f5c542; --en:#4da3ff;
-    --radius:14px;
+    --radius:14px; --side:290px;
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
     font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans Arabic","Noto Naskh Arabic",Arial,sans-serif;
     -webkit-font-smoothing:antialiased}
   body{display:flex;flex-direction:column;min-height:100dvh}
-  header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);
-    background:linear-gradient(180deg,#0f151d,#0b0f14);position:sticky;top:0;z-index:5}
-  header h1{font-size:18px;margin:0;letter-spacing:.3px;display:flex;align-items:center;gap:8px}
+  header{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#0f151d,#0b0f14);position:sticky;top:0;z-index:15}
+  header h1{font-size:18px;margin:0;letter-spacing:.3px;display:flex;align-items:center;gap:8px;white-space:nowrap}
   header h1 span{color:var(--muted);font-weight:400;font-size:14px}
-  .status{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+  .status{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);white-space:nowrap}
   .dot{width:9px;height:9px;border-radius:50%;background:#556;box-shadow:0 0 0 0 rgba(61,220,151,.5)}
   .dot.on{background:var(--accent);animation:pulse 1.6s infinite}
   .dot.busy{background:var(--warn)}
   .dot.err{background:var(--danger)}
   @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(61,220,151,.5)}70%{box-shadow:0 0 0 8px rgba(61,220,151,0)}100%{box-shadow:0 0 0 0 rgba(61,220,151,0)}}
-  .icon-btn{background:none;border:1px solid var(--line);color:var(--muted);border-radius:10px;padding:6px 10px;cursor:pointer;font-size:13px}
+  .icon-btn{background:none;border:1px solid var(--line);color:var(--muted);border-radius:10px;padding:6px 10px;cursor:pointer;font-size:13px;white-space:nowrap}
   .icon-btn:hover{color:var(--text);border-color:#3a4a60}
+  .icon-btn.danger:hover{color:var(--danger);border-color:#5a2a38}
 
-  main{flex:1;display:flex;flex-direction:column;max-width:900px;width:100%;margin:0 auto;padding:14px 14px 130px}
+  .layout{flex:1;display:flex;min-height:0}
+  aside{width:var(--side);flex:0 0 var(--side);border-right:1px solid var(--line);background:#0d1219;display:flex;flex-direction:column;position:sticky;top:53px;height:calc(100dvh - 53px);overflow:hidden}
+  aside .top{padding:12px;display:flex;gap:8px;border-bottom:1px solid var(--line)}
+  aside .top .new{flex:1;background:var(--accent);color:#06130d;border:0;border-radius:10px;padding:9px;font-weight:700;cursor:pointer;font-size:14px}
+  aside .list{flex:1;overflow:auto;padding:8px}
+  .conv{padding:9px 10px;border-radius:10px;cursor:pointer;border:1px solid transparent;margin-bottom:4px}
+  .conv:hover{background:var(--panel)}
+  .conv.active{background:var(--panel2);border-color:#2b3a50}
+  .conv .t{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .conv .m{font-size:11px;color:var(--muted);display:flex;gap:8px}
+  .conv .t:empty::before{content:"Untitled";color:var(--muted)}
+  aside .bottom{padding:10px 12px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+  aside .bottom .sync{width:100%}
+  .side-empty{color:#3d4b5e;font-size:13px;text-align:center;padding:24px 10px}
 
+  main{flex:1;min-width:0;display:flex;flex-direction:column;max-width:900px;width:100%;margin:0 auto;padding:14px 14px 130px}
+  .convbar{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+  .convbar input{flex:1;min-width:160px;background:transparent;border:1px solid transparent;color:var(--text);font-size:17px;font-weight:600;padding:6px 8px;border-radius:8px}
+  .convbar input:hover,.convbar input:focus{border-color:var(--line);outline:none;background:var(--panel)}
+  .convbar .meta{font-size:12px;color:var(--muted);white-space:nowrap}
   .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
   .seg{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:3px}
   .seg button{background:none;border:0;color:var(--muted);padding:7px 12px;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600}
@@ -65,8 +84,9 @@
   .card .actions button:hover{color:var(--text)}
   [dir=rtl]{text-align:right;font-family:"Noto Naskh Arabic","Noto Sans Arabic","Segoe UI",Tahoma,Arial,sans-serif}
 
-  .bar{position:fixed;left:0;right:0;bottom:0;padding:14px 16px calc(14px + env(safe-area-inset-bottom));
-    background:linear-gradient(180deg,rgba(11,15,20,0),rgba(11,15,20,.92) 30%,#0b0f14);display:flex;justify-content:center;align-items:center;gap:14px;z-index:5}
+  .bar{position:fixed;left:var(--side);right:0;bottom:0;padding:14px 16px calc(14px + env(safe-area-inset-bottom));
+    background:linear-gradient(180deg,rgba(11,15,20,0),rgba(11,15,20,.92) 30%,#0b0f14);display:flex;justify-content:center;align-items:center;gap:14px;z-index:5;pointer-events:none}
+  .bar>*{pointer-events:auto}
   .mic{width:74px;height:74px;border-radius:50%;border:0;cursor:pointer;color:#06130d;font-size:28px;
     background:radial-gradient(circle at 30% 30%,#6cf0b8,var(--accent));box-shadow:0 8px 30px rgba(61,220,151,.35);transition:transform .1s}
   .mic:active{transform:scale(.96)}
@@ -74,51 +94,77 @@
   .mic:disabled{opacity:.5;cursor:wait}
   .hint{font-size:12px;color:var(--muted);text-align:center;min-width:120px}
 
-  .toast{position:fixed;top:64px;left:50%;transform:translateX(-50%);background:#2a1620;border:1px solid #6a2a3c;color:#ffd4dd;padding:10px 14px;border-radius:10px;font-size:13px;z-index:20;max-width:90vw;display:none}
+  .toast{position:fixed;top:64px;left:50%;transform:translateX(-50%);background:#2a1620;border:1px solid #6a2a3c;color:#ffd4dd;padding:10px 14px;border-radius:10px;font-size:13px;z-index:40;max-width:90vw;display:none}
   .toast.show{display:block}
+  .toast.ok{background:#12291f;border-color:#2a6a4c;color:#c9f5df}
 
   .modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:30;padding:20px}
   .modal.show{display:flex}
-  .modal .box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;max-width:380px;width:100%}
+  .modal .box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;max-width:400px;width:100%}
   .modal h2{margin:0 0 8px;font-size:18px}
   .modal p{color:var(--muted);font-size:13px;margin:0 0 14px}
   .modal input{width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:#0e141c;color:var(--text);font-size:15px;margin-bottom:12px}
   .modal button.primary{width:100%;padding:11px;border:0;border-radius:10px;background:var(--accent);color:#06130d;font-weight:700;font-size:15px;cursor:pointer}
   .row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:10px 0;font-size:14px}
   .row select{background:#0e141c;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+  .row code{background:#0e141c;border:1px solid var(--line);padding:3px 8px;border-radius:6px;font-size:13px;user-select:all}
   .empty{color:#3d4b5e;text-align:center;padding:30px 10px;font-size:14px}
-  @media (max-width:560px){ .live .src{font-size:18px} .card .orig,.card .trans{font-size:16px} header h1 span{display:none} }
+  #menuBtn{display:none}
+  @media (max-width:820px){
+    #menuBtn{display:inline-block}
+    aside{position:fixed;left:0;top:53px;bottom:0;height:auto;transform:translateX(-100%);transition:transform .2s;z-index:20;box-shadow:0 0 40px rgba(0,0,0,.6)}
+    aside.open{transform:none}
+    .bar{left:0}
+    .live .src{font-size:18px} .card .orig,.card .trans{font-size:16px} header h1 span{display:none}
+  }
 </style>
 </head>
 <body>
 <header>
+  <button class="icon-btn" id="menuBtn" title="Conversations">☰</button>
   <h1>🎙️ Tarjem <span>· live Arabic ⇄ English interpreter</span></h1>
   <div class="status"><i class="dot" id="dot"></i><span id="statusText">idle</span></div>
   <button class="icon-btn" id="settingsBtn" title="Settings">⚙️</button>
 </header>
 
-<main>
-  <div class="controls">
-    <div class="seg" id="modeSeg">
-      <button data-mode="auto" class="active">Auto detect</button>
-      <button data-mode="ar">عربي → EN</button>
-      <button data-mode="en">EN → عربي</button>
+<div class="layout">
+  <aside id="side">
+    <div class="top"><button class="new" id="newConv">＋ New conversation</button></div>
+    <div class="list" id="convList"><div class="side-empty">No conversations yet</div></div>
+    <div class="bottom">
+      <button class="icon-btn" id="downloadAll" title="Download every conversation as one text file">⬇ Download all scripts</button>
+      <button class="icon-btn" id="backupJson" title="Full backup as JSON">Backup .json</button>
+      <span class="sync" id="syncState">saved locally</span>
     </div>
-    <label class="toggle" id="speakToggle"><input type="checkbox" id="speak"> 🔊 Speak translation</label>
-    <label class="toggle on" id="liveToggle"><input type="checkbox" id="liveInterim" checked> ⚡ Live preview</label>
-    <button class="icon-btn" id="copyBtn" title="Copy transcript">Copy</button>
-    <button class="icon-btn" id="downloadBtn" title="Download transcript">Save .txt</button>
-    <button class="icon-btn" id="clearBtn" title="Clear">Clear</button>
-  </div>
+  </aside>
 
-  <section class="live" id="live">
-    <div class="label"><span id="liveLabel">Listening</span><span class="lvl"><i id="lvl"></i></span><span id="latency"></span></div>
-    <div class="src" id="liveSrc" data-placeholder="Press the mic and start talking…"></div>
-    <div class="tr" id="liveTr"></div>
-  </section>
+  <main>
+    <div class="convbar">
+      <input id="convTitle" placeholder="Conversation title" maxlength="120">
+      <span class="meta" id="convMeta"></span>
+      <button class="icon-btn" id="downloadConv" title="Download this conversation">⬇ Script</button>
+      <button class="icon-btn" id="copyBtn" title="Copy transcript">Copy</button>
+      <button class="icon-btn danger" id="deleteConv" title="Delete this conversation">Delete</button>
+    </div>
+    <div class="controls">
+      <div class="seg" id="modeSeg">
+        <button data-mode="auto" class="active">Auto detect</button>
+        <button data-mode="ar">عربي → EN</button>
+        <button data-mode="en">EN → عربي</button>
+      </div>
+      <label class="toggle" id="speakToggle"><input type="checkbox" id="speak"> 🔊 Speak translation</label>
+      <label class="toggle on" id="liveToggle"><input type="checkbox" id="liveInterim" checked> ⚡ Live preview</label>
+    </div>
 
-  <section class="feed" id="feed"><div class="empty" id="emptyHint">Finished sentences appear here with their translation.</div></section>
-</main>
+    <section class="live" id="live">
+      <div class="label"><span id="liveLabel">Listening</span><span class="lvl"><i id="lvl"></i></span><span id="latency"></span></div>
+      <div class="src" id="liveSrc" data-placeholder="Press the mic and start talking…"></div>
+      <div class="tr" id="liveTr"></div>
+    </section>
+
+    <section class="feed" id="feed"><div class="empty" id="emptyHint">Finished sentences appear here with their translation.</div></section>
+  </main>
+</div>
 
 <div class="bar">
   <div class="hint" id="hintL"></div>
@@ -146,6 +192,8 @@
       <select id="setThreshold"><option value="0.45">high</option><option value="0.6" selected>normal</option><option value="0.75">low (noisy room)</option></select></div>
     <div class="row"><span>Mute mic while speaking translation</span><input type="checkbox" id="setDuck" checked></div>
     <div class="row"><span>Access code</span><button class="icon-btn" id="setCode">change</button></div>
+    <div class="row"><span title="Conversations are stored under this key. Enter it on another device to see the same history.">Sync key</span><code id="userKey"></code></div>
+    <div class="row"><span>Use another device's key</span><button class="icon-btn" id="setUserKey">enter key</button></div>
     <p id="setInfo" style="margin-top:12px"></p>
     <button class="primary" id="settingsClose">Done</button>
   </div>

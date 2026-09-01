@@ -29,6 +29,15 @@ services:
         value: groq
       - key: GEMINI_API_KEY
         sync: false
+      # Durable conversation storage (Supabase Storage bucket, files only - no SQL).
+      # Without these, conversations live in the browser + this instance's disk,
+      # and the disk copy is wiped on every redeploy.
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: SUPABASE_BUCKET
+        value: tarjem
       - key: TTS_VOICE_EN
         value: en-US-JennyNeural
       - key: TTS_VOICE_AR

@@ -7,6 +7,17 @@ Real-time Arabic ⇄ English interpreter that runs in the browser and on a free 
 - **Live preview:** while you are still talking a partial transcript + translation is shown every ~3 s; the final sentence is re-transcribed with the full model when you pause.
 - **Voice out:** optional edge-tts playback of every translation (mic auto-mutes while it speaks).
 - **Endpointing:** Silero VAD v5 in the browser (vendored under `static/vad/`, no CDN).
+- **Conversations:** every session is saved as a conversation. Sidebar lists history; open any one to read it or keep recording into it; rename, delete, download one script or all scripts as .txt, or a full .json backup.
+
+## Where conversations live
+
+Three copies, so nothing is lost:
+
+1. **Browser** (localStorage) - instant, works offline.
+2. **Server** - `data/<sync-key>/` on a PC. On Render the disk is wiped at every redeploy, so add layer 3 there.
+3. **Supabase Storage** (optional, free) - set `SUPABASE_URL` + `SUPABASE_SERVICE_KEY` and the server keeps the same JSON files in a private bucket called `tarjem`. No tables, no SQL; the bucket is created automatically.
+
+Conversations are keyed by a random **sync key** the browser generates (Settings → Sync key). Paste that key into another device to see the same history there. Nobody can read your conversations without the key.
 
 ## Run locally (still uses the cloud APIs)
 

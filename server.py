@@ -75,6 +75,10 @@ MAX_AUDIO_BYTES = 6 * 1024 * 1024  # ~3 min of 16 kHz PCM
 
 app = Flask(__name__, static_folder=None)
 
+from storage import ID_RE, USER_RE, make_store, validate_doc  # noqa: E402
+
+STORE = make_store(BASE_DIR)
+
 LANG_NAMES = {"ar": "Arabic", "en": "English"}
 
 # Phrases Whisper emits on silence / music instead of real speech.
@@ -120,6 +124,7 @@ def _check_access() -> None:
 
 
 @app.errorhandler(401)
+@app.errorhandler(404)
 @app.errorhandler(413)
 @app.errorhandler(429)
 @app.errorhandler(400)
@@ -380,6 +385,7 @@ def health():
         translate_provider="gemini" if (TRANSLATE_PROVIDER == "gemini" and GEMINI_API_KEY) else "groq",
         translate_model=_working_model or TRANSLATE_MODELS[0],
         access_required=bool(ACCESS_CODE),
+        store=STORE.name,
     )
 
 
@@ -475,6 +481,74 @@ def api_translate():
     except Exception as e:
         return jsonify(error=str(e)), 502
     return jsonify(text=text, lang=source, target=target, **tr)
+
+
+# --------------------------------------------------------------------------- #
+# conversations
+# --------------------------------------------------------------------------- #
+def _user_key() -> str:
+    key = request.headers.get("X-User-Key", "").strip()
+    if not USER_RE.match(key):
+        abort(400, description="missing or invalid X-User-Key")
+    return key
+
+
+@app.get("/api/conversations")
+def conv_list():
+    _check_access()
+    user = _user_key()
+    try:
+        return jsonify(conversations=STORE.list(user), store=STORE.name)
+    except Exception as e:
+        log.warning("list failed: %s", e)
+        return jsonify(error=f"storage unavailable: {e}"), 502
+
+
+@app.get("/api/conversations/<cid>")
+def conv_get(cid):
+    _check_access()
+    user = _user_key()
+    if not ID_RE.match(cid):
+        abort(400, description="bad id")
+    try:
+        doc = STORE.get(user, cid)
+    except Exception as e:
+        return jsonify(error=f"storage unavailable: {e}"), 502
+    if doc is None:
+        abort(404, description="not found")
+    return jsonify(doc)
+
+
+@app.put("/api/conversations/<cid>")
+def conv_put(cid):
+    _check_access()
+    user = _user_key()
+    if not ID_RE.match(cid):
+        abort(400, description="bad id")
+    body = request.get_json(silent=True)
+    try:
+        doc = validate_doc(body, cid)
+    except ValueError as e:
+        abort(400, description=str(e))
+    try:
+        meta = STORE.put(user, doc)
+    except Exception as e:
+        log.warning("put failed: %s", e)
+        return jsonify(error=f"storage unavailable: {e}"), 502
+    return jsonify(meta)
+
+
+@app.delete("/api/conversations/<cid>")
+def conv_delete(cid):
+    _check_access()
+    user = _user_key()
+    if not ID_RE.match(cid):
+        abort(400, description="bad id")
+    try:
+        STORE.delete(user, cid)
+    except Exception as e:
+        return jsonify(error=f"storage unavailable: {e}"), 502
+    return jsonify(ok=True)
 
 
 @app.get("/api/tts")
