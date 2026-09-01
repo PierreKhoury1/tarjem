@@ -276,7 +276,7 @@
     state.listening = false;
     if (state.vad) { try { await state.vad.pause(); } catch {} }
     if (state.speaking && state.seg) { const seg = state.seg; state.seg = null; state.speaking = false; finalizeSegment(seg); }
-    els.live.classList.remove("speaking"); clearLive(); els.lvl.style.width = "0";
+    els.live.classList.remove("speaking"); els.liveLabel.textContent = "Listening"; clearLive(); els.lvl.style.width = "0";
     els.micBtn.classList.remove("on"); els.micBtn.textContent = "🎤"; els.hintR.textContent = "tap to start";
     setStatus("idle", "");
   }

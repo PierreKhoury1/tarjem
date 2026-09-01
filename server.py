@@ -165,6 +165,8 @@ def transcribe(wav_bytes: bytes, *, interim: bool, lang: str | None, prompt: str
         files=files,
         timeout=60,
     )
+    if r.status_code == 401:
+        raise RuntimeError("Groq API key rejected - set a valid GROQ_API_KEY on the server")
     if r.status_code == 429:
         raise RuntimeError("Groq rate limit hit - wait a moment")
     if r.status_code >= 400:
