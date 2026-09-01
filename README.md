@@ -3,7 +3,7 @@
 Real-time Arabic ⇄ English interpreter that runs in the browser and on a free Render web service. Nothing is processed on your machine.
 
 - **Speech → text:** Groq-hosted Whisper large-v3 (free tier). Auto-detects Arabic vs English, or force a direction.
-- **Translation:** free Groq LLMs (Kimi K2 → gpt-oss-120b → Llama 3.3 70B fallback chain) with conversation context, or Gemini 2.5 Flash if you set a Gemini key.
+- **Translation:** free Groq LLMs (gpt-oss-120b → Qwen 3.8 27B → Qwen 3.6 27B → gpt-oss-20b fallback chain) with conversation context, or Gemini 2.5 Flash if you set a Gemini key.
 - **Live preview:** while you are still talking a partial transcript + translation is shown every ~3 s; the final sentence is re-transcribed with the full model when you pause.
 - **Voice out:** optional edge-tts playback of every translation (mic auto-mutes while it speaks).
 - **Endpointing:** Silero VAD v5 in the browser (vendored under `static/vad/`, no CDN).

@@ -23,7 +23,7 @@ services:
       - key: STT_INTERIM_MODEL
         value: whisper-large-v3-turbo
       - key: TRANSLATE_MODELS
-        value: moonshotai/kimi-k2-instruct-0905,openai/gpt-oss-120b,llama-3.3-70b-versatile
+        value: openai/gpt-oss-120b,qwen/qwen3.8-27b,qwen/qwen3.6-27b,openai/gpt-oss-20b
       # Optional: set TRANSLATE_PROVIDER=gemini + GEMINI_API_KEY (free at aistudio.google.com)
       - key: TRANSLATE_PROVIDER
         value: groq
