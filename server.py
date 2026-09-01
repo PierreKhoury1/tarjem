@@ -492,6 +492,27 @@ def api_tts():
     return Response(audio, mimetype="audio/mpeg", headers={"Cache-Control": "private, max-age=3600"})
 
 
+def _keep_warm() -> None:
+    """Render free instances sleep after 15 idle minutes and take ~50 s to wake.
+    Render sets RENDER_EXTERNAL_URL; ping ourselves every 10 minutes when it is present."""
+    url = os.environ.get("RENDER_EXTERNAL_URL", "").rstrip("/")
+    if not url or os.environ.get("KEEP_WARM", "1") == "0":
+        return
+
+    def loop() -> None:
+        while True:
+            time.sleep(600)
+            try:
+                requests.get(f"{url}/api/health", timeout=20)
+            except Exception as e:  # noqa: BLE001
+                log.debug("keep-warm ping failed: %s", e)
+
+    threading.Thread(target=loop, name="keep-warm", daemon=True).start()
+
+
+_keep_warm()
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "8096"))
     if not GROQ_API_KEY:
