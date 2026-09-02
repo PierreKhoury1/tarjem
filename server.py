@@ -69,7 +69,7 @@ GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
 
 ACCESS_CODE = os.environ.get("ACCESS_CODE", "").strip()
 TTS_VOICE_EN = os.environ.get("TTS_VOICE_EN", "en-US-JennyNeural")
-TTS_VOICE_AR = os.environ.get("TTS_VOICE_AR", "ar-SA-ZariyahNeural")
+TTS_VOICE_AR = os.environ.get("TTS_VOICE_AR", "ar-JO-SanaNeural")  # Jordanian = closest Levantine voice edge-tts has
 RATE_LIMIT_PER_MIN = int(os.environ.get("RATE_LIMIT_PER_MIN", "90"))
 MAX_AUDIO_BYTES = 6 * 1024 * 1024  # ~3 min of 16 kHz PCM
 
@@ -185,6 +185,9 @@ def transcribe(wav_bytes: bytes, *, interim: bool, lang: str | None, prompt: str
     # end of the new utterance - it got worse the longer a conversation ran.
     # STT_HINT is an optional short vocabulary hint (names, places), never history.
     hint = os.environ.get("STT_HINT", "").strip()
+    if not hint and lang == "ar":
+        # Short dialect sample so Whisper keeps Palestinian spellings instead of "correcting" to MSA.
+        hint = "شو بدك تعمل هلق؟ والله ما بعرف، بس كتير منيح."
     if hint:
         data["prompt"] = hint[:200]
     files = {"file": ("segment.wav", wav_bytes, "audio/wav")}
@@ -244,6 +247,39 @@ SYSTEM_PROMPT = (
     "- Output ONLY the translation. No quotes, no notes, no explanations, no transliteration, no alternatives."
 )
 
+PALESTINIAN_IN = (
+    "\nThe Arabic speaker is Palestinian (Jerusalem / West Bank Levantine dialect). Read the transcript as spoken "
+    "Palestinian Arabic even when Whisper spelled it like MSA: بدي = I want, شو = what, ليش = why, وين = where, "
+    "هلق/هلأ/هسا = now, هاد/هاي/هدول = this/these, كتير = very, منيح = good, مش/ما = not, ع = على, إيش = what, "
+    "بكرا = tomorrow, مبارح = yesterday, تبع = belonging to, لسا = still/not yet, بلاش = never mind / free, "
+    "يلا = come on, خلص = done/enough, والله = honestly. Common courtesies: يعطيك العافية (thanks for your effort), "
+    "على راسي (gladly), ولا يهمك (don't worry about it), تكرم عينك (of course), الله يسلمك (thank you), "
+    "صحتين (enjoy your meal), نعيماً (after a haircut/shower). Translate their intent, not their words."
+)
+
+PALESTINIAN_OUT = (
+    "\nWrite the Arabic in natural SPOKEN PALESTINIAN dialect (Jerusalem / West Bank Levantine), the way a "
+    "Palestinian would actually say it - NOT Modern Standard Arabic. Use بدي (want), شو (what), ليش (why), "
+    "وين (where), هلق/هلأ (now), هاد/هاي/هدول (this/these), كتير (very), منيح (good), مش (not), ما + verb for "
+    "negation, ع instead of على, بكرا (tomorrow), مبارح (yesterday), لسا (still), present tense with the ب- prefix "
+    "(بروح، بحكي، بشتغل), future with رح (رح أروح), إحنا / إنتو / هنّي for we / you-plural / they. "
+    "Spell words the way Palestinians write them in chat (بدي, مش, هلق). Avoid Egyptian (عايز، دلوقتي، إزاي), "
+    "Gulf (أبغى، وش), and MSA forms (أريد، ماذا، لماذا، الآن، سوف، ليس). Keep it polite and natural; a short "
+    "sentence in English should be a short sentence in Arabic. Numbers, names and places stay exact."
+)
+
+MSA_OUT = "\nWrite the Arabic in clear Modern Standard Arabic (فصحى) with proper punctuation."
+
+
+def build_system(source: str, target: str, dialect: str) -> str:
+    system = SYSTEM_PROMPT.format(target=LANG_NAMES[target])
+    if dialect == "palestinian":
+        system += PALESTINIAN_IN if source == "ar" else PALESTINIAN_OUT
+    elif target == "ar":
+        system += MSA_OUT
+    return system
+
+
 _working_model: str | None = None
 _model_lock = threading.Lock()
 
@@ -296,9 +332,9 @@ def _clean_translation(out: str) -> str:
     return out
 
 
-def translate(text: str, source: str, target: str, context: list[dict]) -> dict:
+def translate(text: str, source: str, target: str, context: list[dict], dialect: str = "palestinian") -> dict:
     global _working_model
-    system = SYSTEM_PROMPT.format(target=LANG_NAMES[target])
+    system = build_system(source, target, dialect)
     ctx_lines = []
     for c in context[-6:]:
         src = (c.get("text") or "").strip()
@@ -417,6 +453,7 @@ def api_transcribe():
     kind = request.form.get("kind", "final")
     mode = request.form.get("mode", "auto")
     want_translation = request.form.get("translate", "1") != "0"
+    dialect = request.form.get("dialect", "palestinian")
     try:
         context = json.loads(request.form.get("context") or "[]")
     except json.JSONDecodeError:
@@ -453,7 +490,7 @@ def api_transcribe():
     if want_translation:
         t1 = time.time()
         try:
-            tr = translate(stt["text"], source, target, context)
+            tr = translate(stt["text"], source, target, context, dialect)
             result["translation"] = tr["translation"]
             result["translate_model"] = tr["model"]
             result["translate_ms"] = int((time.time() - t1) * 1000)
@@ -477,7 +514,7 @@ def api_translate():
     if target not in LANG_NAMES:
         abort(400, description="bad target")
     try:
-        tr = translate(text, source, target, body.get("context") or [])
+        tr = translate(text, source, target, body.get("context") or [], body.get("dialect") or "palestinian")
     except Exception as e:
         return jsonify(error=str(e)), 502
     return jsonify(text=text, lang=source, target=target, **tr)

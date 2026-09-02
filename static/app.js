@@ -40,6 +40,7 @@
 
   const state = {
     mode: store.get("mode", "auto"),
+    dialect: store.get("dialect", "palestinian"),
     speak: store.get("speak", false),
     liveInterim: store.get("live", true),
     duck: store.get("duck", true),
@@ -273,6 +274,7 @@
     fd.append("audio", encodeWav16(samples), "segment.wav");
     fd.append("kind", kind);
     fd.append("mode", state.mode);
+    fd.append("dialect", state.dialect);
     fd.append("translate", "1");
     fd.append("context", JSON.stringify(recentContext()));
     const r = await fetch("/api/transcribe", { method: "POST", body: fd, headers: headers() });
@@ -521,6 +523,14 @@
   }
   els.modeSeg.addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) applyMode(b.dataset.mode); });
   applyMode(state.mode);
+
+  const dialectSeg = $("dialectSeg");
+  function applyDialect(d) {
+    state.dialect = d; store.set("dialect", d);
+    dialectSeg.querySelectorAll("button").forEach((b) => b.classList.toggle("active", b.dataset.dialect === d));
+  }
+  dialectSeg.addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) applyDialect(b.dataset.dialect); });
+  applyDialect(state.dialect);
 
   els.speak.checked = state.speak; els.speakToggle.classList.toggle("on", state.speak);
   els.speak.onchange = () => { state.speak = els.speak.checked; store.set("speak", state.speak); els.speakToggle.classList.toggle("on", state.speak); };

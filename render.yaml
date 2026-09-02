@@ -41,4 +41,4 @@ services:
       - key: TTS_VOICE_EN
         value: en-US-JennyNeural
       - key: TTS_VOICE_AR
-        value: ar-SA-ZariyahNeural
+        value: ar-JO-SanaNeural
