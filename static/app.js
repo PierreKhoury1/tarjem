@@ -185,7 +185,7 @@
     for (const e of doc.entries) renderCard(e, false);
     refreshEmpty(); clearLive();
     renderConvList(); updateConvMeta();
-    els.feed.lastElementChild?.scrollIntoView({ block: "nearest" });
+    scrollToBottom(true);
   }
 
   function updateConvMeta() {
@@ -331,6 +331,26 @@
     }).finally(() => { if (state.listening) setStatus(state.speaking ? "speaking" : "listening", "on"); });
   }
 
+  // ------------------------------------------------------------------ scrolling
+  // The bottom bar (live preview + mic) is fixed; keep main's bottom padding equal to its
+  // height so the newest card is never hidden behind it, and follow new lines like a chat.
+  const bar = $("bar"), jumpBtn = $("jumpBtn");
+  function syncBarHeight() { document.body.style.setProperty("--barH", bar.getBoundingClientRect().height + "px"); }
+  if (window.ResizeObserver) new ResizeObserver(syncBarHeight).observe(bar); else window.addEventListener("resize", syncBarHeight);
+  syncBarHeight();
+  function distanceFromBottom() { const se = document.scrollingElement; return se.scrollHeight - se.clientHeight - se.scrollTop; }
+  let followNewest = true;
+  function scrollToBottom(force) {
+    if (!force && !followNewest) return;
+    requestAnimationFrame(() => window.scrollTo({ top: document.scrollingElement.scrollHeight, behavior: force ? "smooth" : "auto" }));
+    followNewest = true; jumpBtn.classList.remove("show");
+  }
+  window.addEventListener("scroll", () => {
+    followNewest = distanceFromBottom() < 160;
+    jumpBtn.classList.toggle("show", !followNewest && !!els.feed.querySelector(".card"));
+  }, { passive: true });
+  jumpBtn.onclick = () => scrollToBottom(true);
+
   // ------------------------------------------------------------------ cards
   function refreshEmpty() { els.emptyHint.style.display = els.feed.querySelector(".card") ? "none" : ""; }
 
@@ -346,7 +366,7 @@
     card.querySelector(".copy").onclick = () => navigator.clipboard?.writeText(entry.text + "\n" + entry.translation).then(() => toast("Copied", 1200, true));
     els.feed.appendChild(card); refreshEmpty();
     if (!pending) updateCard(card, entry);
-    else card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    else scrollToBottom(false);
     return card;
   }
 
@@ -359,6 +379,7 @@
     const tr = card.querySelector(".trans");
     if (entry.error && !entry.translation) { tr.className = "trans error"; tr.textContent = "⚠ " + entry.error; tr.dir = "ltr"; }
     else { tr.className = "trans"; tr.textContent = entry.translation; tr.dir = dirFor(entry.target); }
+    if (card === els.feed.lastElementChild) scrollToBottom(false);
   }
 
   // ------------------------------------------------------------------ tts

@@ -14,10 +14,10 @@
     --radius:14px; --side:290px;
   }
   *{box-sizing:border-box}
-  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
+  html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);
     font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans Arabic","Noto Naskh Arabic",Arial,sans-serif;
     -webkit-font-smoothing:antialiased}
-  body{display:flex;flex-direction:column;min-height:100dvh}
+  body{display:flex;flex-direction:column;min-height:100dvh;--barH:200px}
   header{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);
     background:linear-gradient(180deg,#0f151d,#0b0f14);position:sticky;top:0;z-index:15}
   header h1{font-size:18px;margin:0;letter-spacing:.3px;display:flex;align-items:center;gap:8px;white-space:nowrap}
@@ -32,8 +32,8 @@
   .icon-btn:hover{color:var(--text);border-color:#3a4a60}
   .icon-btn.danger:hover{color:var(--danger);border-color:#5a2a38}
 
-  .layout{flex:1;display:flex;min-height:0}
-  aside{width:var(--side);flex:0 0 var(--side);border-right:1px solid var(--line);background:#0d1219;display:flex;flex-direction:column;position:sticky;top:53px;height:calc(100dvh - 53px);overflow:hidden}
+  .layout{flex:1;display:flex;align-items:stretch}
+  aside{width:var(--side);flex:0 0 var(--side);border-right:1px solid var(--line);background:#0d1219;display:flex;flex-direction:column;position:sticky;top:53px;height:calc(100dvh - 53px);align-self:flex-start;overflow:hidden}
   aside .top{padding:12px;display:flex;gap:8px;border-bottom:1px solid var(--line)}
   aside .top .new{flex:1;background:var(--accent);color:#06130d;border:0;border-radius:10px;padding:9px;font-weight:700;cursor:pointer;font-size:14px}
   aside .list{flex:1;overflow:auto;padding:8px}
@@ -47,7 +47,7 @@
   aside .bottom .sync{width:100%}
   .side-empty{color:#3d4b5e;font-size:13px;text-align:center;padding:24px 10px}
 
-  main{flex:1;min-width:0;display:flex;flex-direction:column;max-width:900px;width:100%;margin:0 auto;padding:14px 14px 130px}
+  main{flex:1;min-width:0;display:flex;flex-direction:column;max-width:900px;width:100%;margin:0 auto;padding:14px 14px calc(var(--barH) + 16px)}
   .convbar{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
   .convbar input{flex:1;min-width:160px;background:transparent;border:1px solid transparent;color:var(--text);font-size:17px;font-weight:600;padding:6px 8px;border-radius:8px}
   .convbar input:hover,.convbar input:focus{border-color:var(--line);outline:none;background:var(--panel)}
@@ -60,16 +60,16 @@
   .toggle input{accent-color:var(--accent);width:16px;height:16px;margin:0}
   .toggle.on{color:var(--text)}
 
-  .live{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;min-height:96px;position:relative;overflow:hidden}
+  .live{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px;min-height:64px;max-height:38vh;overflow:auto;width:100%;max-width:872px;margin:0 auto 10px}
   .live .label{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);display:flex;align-items:center;gap:8px}
   .live .label .lvl{flex:1;height:4px;background:#1c2533;border-radius:2px;overflow:hidden}
   .live .label .lvl i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .08s}
-  .live .src{font-size:20px;margin-top:6px;min-height:30px;line-height:1.45}
-  .live .tr{font-size:16px;color:#b7c4d6;margin-top:6px;min-height:24px;line-height:1.45}
+  .live .src{font-size:18px;margin-top:4px;min-height:26px;line-height:1.4}
+  .live .tr{font-size:15px;color:#b7c4d6;margin-top:4px;min-height:20px;line-height:1.4}
   .live .src:empty::before{content:attr(data-placeholder);color:#3d4b5e}
   .live.speaking{border-color:#2a7a5a;box-shadow:0 0 0 3px rgba(61,220,151,.08)}
 
-  .feed{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+  .feed{display:flex;flex-direction:column;gap:10px;margin-top:4px}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;animation:in .25s ease}
   @keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
   .card .meta{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);margin-bottom:4px}
@@ -84,10 +84,12 @@
   .card .actions button:hover{color:var(--text)}
   [dir=rtl]{text-align:right;font-family:"Noto Naskh Arabic","Noto Sans Arabic","Segoe UI",Tahoma,Arial,sans-serif}
 
-  .bar{position:fixed;left:var(--side);right:0;bottom:0;padding:14px 16px calc(14px + env(safe-area-inset-bottom));
-    background:linear-gradient(180deg,rgba(11,15,20,0),rgba(11,15,20,.92) 30%,#0b0f14);display:flex;justify-content:center;align-items:center;gap:14px;z-index:5;pointer-events:none}
-  .bar>*{pointer-events:auto}
-  .mic{width:74px;height:74px;border-radius:50%;border:0;cursor:pointer;color:#06130d;font-size:28px;
+  .bar{position:fixed;left:var(--side);right:0;bottom:0;padding:10px 14px calc(12px + env(safe-area-inset-bottom));
+    background:linear-gradient(180deg,rgba(11,15,20,0),rgba(11,15,20,.96) 18%,#0b0f14);display:flex;flex-direction:column;align-items:center;z-index:5}
+  .barrow{display:flex;justify-content:center;align-items:center;gap:14px}
+  .jump{position:fixed;right:18px;bottom:calc(var(--barH) + 12px);z-index:6;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:20px;padding:6px 12px;font-size:12px;cursor:pointer;display:none;box-shadow:0 4px 16px rgba(0,0,0,.4)}
+  .jump.show{display:block}
+  .mic{width:64px;height:64px;border-radius:50%;border:0;cursor:pointer;color:#06130d;font-size:28px;
     background:radial-gradient(circle at 30% 30%,#6cf0b8,var(--accent));box-shadow:0 8px 30px rgba(61,220,151,.35);transition:transform .1s}
   .mic:active{transform:scale(.96)}
   .mic.on{background:radial-gradient(circle at 30% 30%,#ff8aa0,var(--danger));box-shadow:0 8px 30px rgba(255,92,122,.35);color:#fff}
@@ -156,20 +158,22 @@
       <label class="toggle on" id="liveToggle"><input type="checkbox" id="liveInterim" checked> ⚡ Live preview</label>
     </div>
 
-    <section class="live" id="live">
-      <div class="label"><span id="liveLabel">Listening</span><span class="lvl"><i id="lvl"></i></span><span id="latency"></span></div>
-      <div class="src" id="liveSrc" data-placeholder="Press the mic and start talking…"></div>
-      <div class="tr" id="liveTr"></div>
-    </section>
-
     <section class="feed" id="feed"><div class="empty" id="emptyHint">Finished sentences appear here with their translation.</div></section>
   </main>
 </div>
 
-<div class="bar">
-  <div class="hint" id="hintL"></div>
-  <button class="mic" id="micBtn" title="Start / stop">🎤</button>
-  <div class="hint" id="hintR">tap to start</div>
+<button class="jump" id="jumpBtn">↓ newest</button>
+<div class="bar" id="bar">
+  <section class="live" id="live">
+    <div class="label"><span id="liveLabel">Listening</span><span class="lvl"><i id="lvl"></i></span><span id="latency"></span></div>
+    <div class="src" id="liveSrc" data-placeholder="Press the mic and start talking…"></div>
+    <div class="tr" id="liveTr"></div>
+  </section>
+  <div class="barrow">
+    <div class="hint" id="hintL"></div>
+    <button class="mic" id="micBtn" title="Start / stop">🎤</button>
+    <div class="hint" id="hintR">tap to start</div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>

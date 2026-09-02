@@ -180,8 +180,13 @@ def transcribe(wav_bytes: bytes, *, interim: bool, lang: str | None, prompt: str
     }
     if lang in LANG_NAMES:
         data["language"] = lang
-    if prompt:
-        data["prompt"] = prompt[-600:]
+    # Deliberately no `prompt`: conditioning Whisper on earlier sentences makes it
+    # treat similar audio as "already transcribed" and silently drop the start or
+    # end of the new utterance - it got worse the longer a conversation ran.
+    # STT_HINT is an optional short vocabulary hint (names, places), never history.
+    hint = os.environ.get("STT_HINT", "").strip()
+    if hint:
+        data["prompt"] = hint[:200]
     files = {"file": ("segment.wav", wav_bytes, "audio/wav")}
     r = requests.post(
         f"{GROQ_BASE}/audio/transcriptions",
@@ -421,14 +426,9 @@ def api_transcribe():
     if duration < 0.25:
         return jsonify(dropped=True, reason="too short", duration=duration)
 
-    # Whisper's prompt conditions spelling/style on prior text in the same language.
-    prompt = " ".join(
-        (c.get("text") or "") for c in context[-4:] if (forced is None or c.get("lang") == forced)
-    ).strip()
-
     t0 = time.time()
     try:
-        stt = transcribe(wav, interim=(kind == "interim"), lang=forced, prompt=prompt)
+        stt = transcribe(wav, interim=(kind == "interim"), lang=forced, prompt="")
     except Exception as e:
         log.warning("stt failed: %s", e)
         return jsonify(error=f"transcription failed: {e}"), 502
